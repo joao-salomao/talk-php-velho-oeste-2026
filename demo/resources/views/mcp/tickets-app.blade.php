@@ -29,6 +29,23 @@
                 color: var(--text);
                 font-size: 14px;
                 line-height: 1.4;
+                /* Inline (autoResize reporta scrollWidth): sem isto a grid
+                   colapsa pra 1 coluna ~280px. Um min força várias colunas. */
+                min-width: 640px;
+            }
+            /* Fullscreen: o host dá o viewport inteiro — preenchemos tudo
+               e deixamos a grid rolar internamente. */
+            body.fullscreen {
+                min-width: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            body.fullscreen .grid {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow-y: auto;
+                align-content: start;
             }
             .header {
                 display: flex;
@@ -214,10 +231,20 @@
 
         <script type="module">
             createMcpApp(async (app) => {
-                // Mantém o iframe do host sempre do tamanho do conteúdo —
-                // sem isso o board aparece numa caixa minúscula. Tear-down é
-                // automático no shutdown da app.
+                // Inline: mantém o iframe do tamanho do conteúdo.
                 app.autoResize();
+
+                // Pede tela cheia pro host (no inspector é o botão ⤢) — assim
+                // o board preenche o painel inteiro em vez de uma coluna.
+                app.requestDisplayMode('fullscreen');
+
+                // Reage ao modo: aplica/remove o layout de tela cheia.
+                app.onHostContextChanged((ctx) => {
+                    document.body.classList.toggle(
+                        'fullscreen',
+                        ctx.displayMode === 'fullscreen',
+                    );
+                });
 
                 const grid = document.getElementById('grid');
                 const count = document.getElementById('count');

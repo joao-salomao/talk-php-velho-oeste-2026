@@ -4,30 +4,33 @@ declare(strict_types=1);
 
 namespace App\Agents\Tools;
 
-use App\Actions\SearchTicketsAction;
+use App\Models\Ticket;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
 
 /**
- * Binding Laravel AI da capability search_tickets. Lógica em
- * SearchTicketsAction — mesma Action servida via MCP.
+ * Tool do Laravel AI SDK: busca tickets. Aceita customer_id em vez de
+ * nome — força o modelo a resolver via list_customers antes (encadeamento
+ * natural de tools).
  */
 class SearchTickets implements Tool
 {
-    public function __construct(
-        private readonly SearchTicketsAction $action = new SearchTicketsAction,
-    ) {}
-
     public function name(): string
     {
-        return $this->action->name();
+        return 'search_tickets';
     }
 
     public function description(): Stringable|string
     {
-        return $this->action->description();
+        return <<<DESC
+            Search support tickets. Filter by status (open, in_progress,
+            waiting_customer, resolved), keyword (matches subject/description),
+            or customer_id. To filter by customer, first call list_customers
+            to resolve the customer's id, then pass it here. Returns up to
+            10 results.
+            DESC;
     }
 
     /**
@@ -35,11 +38,35 @@ class SearchTickets implements Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return $this->action->schema($schema);
+        return [
+            'status' => $schema->string()
+                ->description('Status filter.')
+                ->enum(Ticket::STATUSES),
+            'keyword' => $schema->string()
+                ->description('Free-text keyword (subject/description).'),
+            'customer_id' => $schema->integer()
+                ->description('Customer ID (resolved via list_customers).'),
+        ];
     }
 
     public function handle(Request $request): Stringable|string
     {
-        return ($this->action)($request->all());
+        $args = $request->all();
+        $status = $args['status'] ?? null;
+        $keyword = $args['keyword'] ?? null;
+        $customerId = $args['customer_id'] ?? null;
+
+        return Ticket::query()
+            ->with('customer:id,name,email')
+            ->when($status, fn ($q, $s) => $q->where('status', $s))
+            ->when($keyword, fn ($q, $k) => $q->where(function ($w) use ($k) {
+                $w->where('subject', 'like', "%{$k}%")
+                    ->orWhere('description', 'like', "%{$k}%");
+            }))
+            ->when($customerId, fn ($q, $id) => $q->where('customer_id', $id))
+            // limit(10) — payload grande estoura tokens e custa caro.
+            ->limit(10)
+            ->get(['id', 'customer_id', 'subject', 'status', 'priority'])
+            ->toJson();
     }
 }

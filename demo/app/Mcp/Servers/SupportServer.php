@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Prompts\TicketReport;
 use App\Mcp\Resources\TicketsApp;
 use App\Mcp\Tools\ListCustomers;
 use App\Mcp\Tools\SearchTickets;
@@ -32,7 +33,8 @@ use Laravel\Mcp\Server\Attributes\Version;
     'then pass that id to search_tickets to filter. '.
     'update_ticket_status mutates state — always confirm with the user first. '.
     'show_tickets renders the ticket list as an interactive board (MCP App) — '.
-    'prefer it over search_tickets when the user wants to visualize results.'
+    'prefer it over search_tickets when the user wants to visualize results. '.
+    'The ticket_report prompt produces a full support operations report.'
 )]
 class SupportServer extends Server
 {
@@ -49,5 +51,8 @@ class SupportServer extends Server
         TicketsApp::class,
     ];
 
-    protected array $prompts = [];
+    /** @var array<int, class-string<\Laravel\Mcp\Server\Prompt>> */
+    protected array $prompts = [
+        TicketReport::class,
+    ];
 }

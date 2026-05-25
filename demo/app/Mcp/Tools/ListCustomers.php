@@ -4,36 +4,27 @@ declare(strict_types=1);
 
 namespace App\Mcp\Tools;
 
-use App\Actions\ListCustomersAction;
+use App\Models\Customer;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
-use Illuminate\Support\Str;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
 
 /**
- * Binding MCP da capability list_customers. Mesma ListCustomersAction que o
- * agente Laravel AI usa no chat — "1 código, N superfícies", sem adapter.
+ * MCP Tool: lista customers com contagem de tickets. Mesma capability que
+ * a tool homônima do agente (App\Agents\Tools\ListCustomers) — aqui no
+ * contrato do Laravel MCP (handle(Request): Response).
  */
 class ListCustomers extends Tool
 {
-    public function __construct(
-        private readonly ListCustomersAction $action = new ListCustomersAction,
-    ) {}
-
     public function name(): string
     {
-        return $this->action->name();
-    }
-
-    public function title(): string
-    {
-        return Str::headline($this->action->name());
+        return 'list_customers';
     }
 
     public function description(): string
     {
-        return $this->action->description();
+        return 'List customers with their ticket count. Optionally filter by a keyword that matches name or email (case-insensitive). Returns up to 20.';
     }
 
     /**
@@ -41,11 +32,26 @@ class ListCustomers extends Tool
      */
     public function schema(JsonSchema $schema): array
     {
-        return $this->action->schema($schema);
+        return [
+            'keyword' => $schema->string()
+                ->description('Optional keyword (matches name or email partial).'),
+        ];
     }
 
     public function handle(Request $request): Response
     {
-        return Response::text(($this->action)($request->all()));
+        $keyword = $request->get('keyword');
+
+        $customers = Customer::query()
+            ->withCount('tickets')
+            ->when($keyword, fn ($q, $k) => $q->where(function ($w) use ($k) {
+                $w->where('name', 'like', "%{$k}%")
+                    ->orWhere('email', 'like', "%{$k}%");
+            }))
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'name', 'email']);
+
+        return Response::json($customers);
     }
 }

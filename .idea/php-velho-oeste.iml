@@ -63,7 +63,6 @@
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/phpunit/php-text-template" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/phpunit/php-timer" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/phpunit/phpunit" />
-      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/prism-php/prism" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/psr/clock" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/psr/container" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/psr/event-dispatcher" />
@@ -125,6 +124,22 @@
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/tijsverkoyen/css-to-inline-styles" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/demo/vendor/voku/portable-ascii" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/storage/app" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/storage/framework" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/defuse/php-encryption" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/firebase/php-jwt" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/laravel/passport" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/lcobucci/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/lcobucci/jwt" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/league/event" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/league/oauth2-server" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/paragonie/constant_time_encoding" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/paragonie/random_compat" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/php-http/discovery" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/phpseclib/phpseclib" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/psr/http-server-handler" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/psr/http-server-middleware" />
+      <excludeFolder url="file://$MODULE_DIR$/demo/vendor/symfony/psr-http-message-bridge" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

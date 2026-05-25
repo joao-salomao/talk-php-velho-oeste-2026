@@ -7,42 +7,72 @@ namespace App\Agents;
 use App\Agents\Tools\ListCustomers;
 use App\Agents\Tools\SearchTickets;
 use App\Agents\Tools\UpdateTicketStatus;
-use Prism\Prism\Enums\Provider;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Text\PendingRequest;
+use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\Model;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\HasTools;
+use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Messages\Message;
+use Laravel\Ai\Promptable;
+use Stringable;
 
 /**
+ * Agente de suporte — agora no Laravel AI SDK (first-party).
  *
- * Compõe o pipeline com Prism::text() + duas tools como classes.
- * Retorna o PendingRequest — o caller decide como consumir
- * (asStream() pro REPL/chat UI, asText() pra resposta one-shot).
- *
- * Sem classe Agent, sem framework agent-first — é só Prism encadeado.
+ * Provider/model/max-steps são declarados via PHP attributes. O histórico
+ * da conversa chega no construtor e é exposto por messages(); o turno novo
+ * vai via ->prompt()/->stream($prompt). As tools são classes que
+ * implementam Laravel\Ai\Contracts\Tool — as MESMAS expostas via MCP.
  */
-final class SupportAgent
+#[Provider(Lab::Anthropic)]
+#[Model('claude-sonnet-4-6')]
+#[MaxSteps(8)]
+final class SupportAgent implements Agent, Conversational, HasTools
 {
-    private const SYSTEM_PROMPT = <<<EOL
-        You are a support agent assistant. You help a HUMAN agent triage
-        and update support tickets.
+    use Promptable;
 
-        Rules:
-        - Use list_customers when the human asks who the customers are
-          or wants ticket counts per customer.
-        - Use search_tickets to find tickets — never invent ticket data.
-        - ALWAYS confirm with the user before calling update_ticket_status.
-        - Be concise. The human is busy and reads fast.
-    EOL;
+    /**
+     * @param  array<int, array{role: string, content: string}>  $history
+     */
+    public function __construct(private array $history = []) {}
 
-    public static function new(): PendingRequest
+    public function instructions(): Stringable|string
     {
-        return Prism::text()
-            ->using(Provider::Anthropic, 'claude-sonnet-4-6')
-            ->withMaxSteps(8)
-            ->withSystemPrompt(self::SYSTEM_PROMPT)
-            ->withTools([
-                new ListCustomers,
-                new SearchTickets,
-                new UpdateTicketStatus,
-            ]);
+        return <<<SYS
+            You are a support agent assistant. Help the human triage and
+            update support tickets.
+            - Use list_customers to resolve a customer name to an id.
+            - Use search_tickets with that id (never invent ticket data).
+            - ALWAYS confirm before calling update_ticket_status.
+            - Be concise.
+            SYS;
+    }
+
+    /**
+     * Histórico da conversa (turnos anteriores). O turno atual entra pelo
+     * argumento de ->stream()/->prompt(), não aqui.
+     *
+     * @return Message[]
+     */
+    public function messages(): iterable
+    {
+        return array_map(
+            fn (array $m) => new Message($m['role'], $m['content']),
+            $this->history,
+        );
+    }
+
+    /**
+     * @return \Laravel\Ai\Contracts\Tool[]
+     */
+    public function tools(): iterable
+    {
+        return [
+            new ListCustomers,
+            new SearchTickets,
+            new UpdateTicketStatus,
+        ];
     }
 }

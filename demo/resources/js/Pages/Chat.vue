@@ -14,8 +14,8 @@ const isStreaming = ref(false);
 const csrf = document.querySelector('meta[name="csrf-token"]').content;
 const scroller = ref(null);
 
-// Provider + model atual — preenchidos pelo stream_start event do Prism
-// (que vem com `model` e `provider` no payload).
+// Provider + model atual — preenchidos pelo stream_start event do
+// Laravel AI SDK (que vem com `model` e `provider` no payload).
 const currentProvider = ref('');
 const currentModel = ref('');
 
@@ -103,13 +103,14 @@ async function consumeSse(body, assistantMsg) {
 }
 
 function handleFrame(frame, assistantMsg) {
-    let event = 'message';
+    // O Laravel AI SDK emite frames `data: <json>` (sem linha event:);
+    // o tipo do evento vem dentro do JSON em `type`. O stream fecha com
+    // `data: [DONE]`.
     let data = '';
     for (const line of frame.split('\n')) {
-        if (line.startsWith('event:')) event = line.slice(6).trim();
-        else if (line.startsWith('data:')) data += line.slice(5).trim();
+        if (line.startsWith('data:')) data += line.slice(5).trim();
     }
-    if (!data) return;
+    if (!data || data === '[DONE]') return;
 
     let parsed;
     try {
@@ -118,11 +119,11 @@ function handleFrame(frame, assistantMsg) {
         return;
     }
 
-    // Event names + payload shapes vêm direto do toArray() de cada
-    // StreamEvent do Prism (enum StreamEventType com underscore).
-    switch (event) {
+    // payload shapes vêm direto do toArray() de cada StreamEvent
+    // (type em snake_case dentro do próprio JSON).
+    switch (parsed.type) {
         case 'stream_start':
-            // Primeiro evento do stream — traz model + provider do Prism.
+            // Primeiro evento do stream — traz model + provider.
             // Usado pra popular o header da página.
             currentModel.value = parsed.model ?? '';
             currentProvider.value = parsed.provider ?? '';
@@ -286,7 +287,7 @@ const samplePrompts = [
                         />
 
                         <!-- Token usage — agregado entre todos os steps
-                             do turno via stream_end events do Prism. -->
+                             do turno via stream_end events. -->
                         <div
                             v-if="m.role === 'assistant' && m.usage"
                             class="mt-3 pt-2 border-t border-zinc-100 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] font-mono text-zinc-400"

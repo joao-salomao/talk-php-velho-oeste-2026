@@ -4,42 +4,43 @@ declare(strict_types=1);
 
 namespace App\Agents\Tools;
 
-use App\Models\Customer;
-use Prism\Prism\Tool;
+use App\Actions\ListCustomersAction;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Tools\Request;
+use Stringable;
 
 /**
- * Lista customers com contagem de tickets. Aceita um keyword opcional
- * pra filtrar por nome ou email — quando ausente, devolve os 20
- * primeiros.
+ * Binding Laravel AI da capability list_customers. Toda a lógica (query,
+ * description, schema) vive em ListCustomersAction — esta classe só adapta
+ * pro contrato do laravel/ai. A mesma Action é servida via MCP.
  */
-class ListCustomers extends Tool
+class ListCustomers implements Tool
 {
-    public function __construct()
+    public function __construct(
+        private readonly ListCustomersAction $action = new ListCustomersAction,
+    ) {}
+
+    public function name(): string
     {
-        $this->as('list_customers')
-            ->for(<<<DESC
-                List customers with their ticket count. Optionally filter
-                by a keyword that matches either the customer name or
-                email (case-insensitive). Returns up to 20 results.
-                DESC)
-            ->withStringParameter(
-                'keyword',
-                'Optional keyword (matches name or email partial).',
-                required: false,
-            )
-            ->using($this);
+        return $this->action->name();
     }
 
-    public function __invoke(?string $keyword = null): string
+    public function description(): Stringable|string
     {
-        return Customer::query()
-            ->withCount('tickets')
-            ->when($keyword, fn ($q, $k) => $q->where(function ($w) use ($k) {
-                $w->where('name', 'like', "%{$k}%")
-                    ->orWhere('email', 'like', "%{$k}%");
-            }))
-            ->orderBy('name')
-            ->get(['id', 'name', 'email'])
-            ->toJson();
+        return $this->action->description();
+    }
+
+    /**
+     * @return array<string, \Illuminate\JsonSchema\Types\Type>
+     */
+    public function schema(JsonSchema $schema): array
+    {
+        return $this->action->schema($schema);
+    }
+
+    public function handle(Request $request): Stringable|string
+    {
+        return ($this->action)($request->all());
     }
 }

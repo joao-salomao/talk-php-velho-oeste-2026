@@ -6,9 +6,7 @@ use App\Agents\SupportAgent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-use Prism\Prism\ValueObjects\Messages\UserMessage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Laravel\Ai\Responses\StreamableAgentResponse;
 
 class ChatController extends Controller
 {
@@ -21,30 +19,29 @@ class ChatController extends Controller
     }
 
     /**
-     * Streaming SSE. O Prism mesmo cuida do framing — `asEventStreamResponse()`
-     * itera o Generator de StreamEvents, emite frames `event: <type>\ndata: <json>`
-     * e cuida de buffering. Nosso trabalho aqui vira: validar o input,
-     * mapear o histórico pra value objects e devolver.
+     * Streaming SSE com o Laravel AI SDK.
+     *
+     * O histórico chega do front-end com o turno atual como última msg:
+     * tudo antes vira o messages() do agente; a última (user) vira o
+     * prompt de ->stream().
+     *
+     * O StreamableAgentResponse é Responsable — o Laravel chama toResponse()
+     * sozinho, que faz o streaming SSE (cada StreamEvent vira `data: <json>`,
+     * com o tipo dentro do JSON, e fecha com `data: [DONE]`).
      */
-    public function stream(Request $request): StreamedResponse
+    public function stream(Request $request): StreamableAgentResponse
     {
-        $raw = $request->validate([
-            'messages' => ['required', 'array'],
+        $validated = $request->validate([
+            'messages' => ['required', 'array', 'min:1'],
             'messages.*.role' => ['required', 'string', 'in:user,assistant'],
             'messages.*.content' => ['required', 'string'],
-        ])['messages'];
+        ]);
 
-        // Prism aceita objetos Message, não arrays — converte o histórico
-        // serializado pelo front-end nos value objects esperados.
-        $messages = array_map(
-            fn (array $m) => $m['role'] === 'user'
-                ? new UserMessage($m['content'])
-                : new AssistantMessage($m['content']),
-            $raw,
-        );
+        $messages = $validated['messages'];
 
-        return SupportAgent::new()
-            ->withMessages($messages)
-            ->asEventStreamResponse();
+        // última mensagem enviada pelo usuário
+        $current = array_pop($messages);
+
+        return SupportAgent::make($messages)->stream($current['content']);
     }
 }

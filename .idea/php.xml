@@ -74,7 +74,6 @@
       <path value="$PROJECT_DIR$/demo/vendor/fruitcake/php-cors" />
       <path value="$PROJECT_DIR$/demo/vendor/phar-io/manifest" />
       <path value="$PROJECT_DIR$/demo/vendor/nesbot/carbon" />
-      <path value="$PROJECT_DIR$/demo/vendor/prism-php/prism" />
       <path value="$PROJECT_DIR$/demo/vendor/laravel/pao" />
       <path value="$PROJECT_DIR$/demo/vendor/laravel/agent-detector" />
       <path value="$PROJECT_DIR$/demo/vendor/laravel/serializable-closure" />
@@ -135,6 +134,20 @@
       <path value="$PROJECT_DIR$/demo/vendor/aws/aws-crt-php" />
       <path value="$PROJECT_DIR$/demo/vendor/aws/aws-sdk-php" />
       <path value="$PROJECT_DIR$/demo/vendor/inertiajs/inertia-laravel" />
+      <path value="$PROJECT_DIR$/demo/vendor/psr/http-server-middleware" />
+      <path value="$PROJECT_DIR$/demo/vendor/psr/http-server-handler" />
+      <path value="$PROJECT_DIR$/demo/vendor/defuse/php-encryption" />
+      <path value="$PROJECT_DIR$/demo/vendor/league/oauth2-server" />
+      <path value="$PROJECT_DIR$/demo/vendor/firebase/php-jwt" />
+      <path value="$PROJECT_DIR$/demo/vendor/league/event" />
+      <path value="$PROJECT_DIR$/demo/vendor/lcobucci/jwt" />
+      <path value="$PROJECT_DIR$/demo/vendor/lcobucci/clock" />
+      <path value="$PROJECT_DIR$/demo/vendor/php-http/discovery" />
+      <path value="$PROJECT_DIR$/demo/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/demo/vendor/paragonie/constant_time_encoding" />
+      <path value="$PROJECT_DIR$/demo/vendor/phpseclib/phpseclib" />
+      <path value="$PROJECT_DIR$/demo/vendor/laravel/passport" />
+      <path value="$PROJECT_DIR$/demo/vendor/symfony/psr-http-message-bridge" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

@@ -36,7 +36,7 @@ function pretty(value) {
 }
 
 /**
- * Timestamp vem em segundos (Unix) no toArray() dos StreamEvents do Prism.
+ * Timestamp vem em segundos (Unix) no toArray() dos StreamEvents.
  * Se a magnitude for muito alta tratamos como millis (defensivo).
  */
 function formatTime(ts) {

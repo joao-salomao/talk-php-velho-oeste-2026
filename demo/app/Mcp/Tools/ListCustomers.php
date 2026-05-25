@@ -49,7 +49,6 @@ class ListCustomers extends Tool
                     ->orWhere('email', 'like', "%{$k}%");
             }))
             ->orderBy('name')
-            ->limit(20)
             ->get(['id', 'name', 'email']);
 
         return Response::json($customers);

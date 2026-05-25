@@ -48,22 +48,19 @@ class UpdateTicketStatus implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $args = $request->all();
-        $ticketId = (int) ($args['ticket_id'] ?? 0);
-        $status = (string) ($args['status'] ?? '');
+        $ticketId = $request->integer('ticket_id');
+        $status = $request->string('status');
 
-        // Allowlist — o LLM pode inventar status ("almost_done").
-        // Validamos do lado PHP, nunca confiando no modelo.
-        if (! in_array($status, Ticket::STATUSES, true)) {
+        if (!in_array($status, Ticket::STATUSES, true)) {
             return json_encode([
                 'error' => 'Invalid status',
                 'allowed' => Ticket::STATUSES,
-            ]);
+            ], JSON_THROW_ON_ERROR);
         }
 
         $ticket = Ticket::find($ticketId);
-        if (! $ticket) {
-            return json_encode(['error' => "Ticket #{$ticketId} not found"]);
+        if (!$ticket) {
+            return json_encode(['error' => "Ticket #{$ticketId} not found"], JSON_THROW_ON_ERROR);
         }
 
         // Idempotência — o agente pode chamar duas vezes; 2ª é no-op.
@@ -73,7 +70,7 @@ class UpdateTicketStatus implements Tool
                 'unchanged' => true,
                 'ticket_id' => $ticket->id,
                 'status' => $status,
-            ]);
+            ], JSON_THROW_ON_ERROR);
         }
 
         $previous = $ticket->status;
@@ -84,6 +81,6 @@ class UpdateTicketStatus implements Tool
             'ticket_id' => $ticket->id,
             'previous_status' => $previous,
             'new_status' => $ticket->status,
-        ]);
+        ], JSON_THROW_ON_ERROR);
     }
 }

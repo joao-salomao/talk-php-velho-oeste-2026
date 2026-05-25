@@ -49,8 +49,6 @@ class ListCustomers implements Tool
                     ->orWhere('email', 'like', "%{$k}%");
             }))
             ->orderBy('name')
-            // limit(20) cap no payload — o modelo refina o keyword se precisar.
-            ->limit(20)
             ->get(['id', 'name', 'email'])
             ->toJson();
     }

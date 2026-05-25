@@ -64,8 +64,6 @@ class SearchTickets implements Tool
                     ->orWhere('description', 'like', "%{$k}%");
             }))
             ->when($customerId, fn ($q, $id) => $q->where('customer_id', $id))
-            // limit(10) — payload grande estoura tokens e custa caro.
-            ->limit(10)
             ->get(['id', 'customer_id', 'subject', 'status', 'priority'])
             ->toJson();
     }

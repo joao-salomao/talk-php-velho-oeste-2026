@@ -45,7 +45,6 @@ class ShowTickets extends Tool
             }))
             ->when($customerId, fn ($q, $id) => $q->where('customer_id', $id))
             ->latest('updated_at')
-            ->limit(25)
             ->get(['id', 'customer_id', 'subject', 'description', 'status', 'priority', 'updated_at'])
             ->map(fn (Ticket $t) => [
                 'id' => $t->id,

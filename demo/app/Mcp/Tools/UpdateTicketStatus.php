@@ -10,12 +10,6 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
 
-/**
- * MCP Tool com efeito colateral. Mesma capability que a tool do agente
- * (App\Agents\Tools\UpdateTicketStatus) — também usada pelo board
- * tickets-app via app.callServerTool('update_ticket_status', ...).
- * Valida tudo do lado PHP: allowlist + idempotência.
- */
 class UpdateTicketStatus extends Tool
 {
     public function name(): string

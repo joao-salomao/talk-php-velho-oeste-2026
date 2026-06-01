@@ -10,11 +10,6 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
 
-/**
- * Tool do Laravel AI SDK: read-only, lista customers com contagem de
- * tickets. Implementa Tool (name/description/schema/handle).
- * A `description` é o prompt que ensina o modelo quando usar.
- */
 class ListCustomers implements Tool
 {
     public function name(): string
@@ -40,7 +35,7 @@ class ListCustomers implements Tool
 
     public function handle(Request $request): Stringable|string
     {
-        $keyword = $request->all()['keyword'] ?? null;
+        $keyword = $request->string('keyword');
 
         return Customer::query()
             ->withCount('tickets')

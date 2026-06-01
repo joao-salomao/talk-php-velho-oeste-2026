@@ -10,11 +10,6 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
 
-/**
- * MCP Tool: lista customers com contagem de tickets. Mesma capability que
- * a tool homônima do agente (App\Agents\Tools\ListCustomers) — aqui no
- * contrato do Laravel MCP (handle(Request): Response).
- */
 class ListCustomers extends Tool
 {
     public function name(): string

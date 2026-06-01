@@ -18,14 +18,6 @@ use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-/**
- * Agente de suporte — agora no Laravel AI SDK (first-party).
- *
- * Provider/model/max-steps são declarados via PHP attributes. O histórico
- * da conversa chega no construtor e é exposto por messages(); o turno novo
- * vai via ->prompt()/->stream($prompt). As tools são classes que
- * implementam Laravel\Ai\Contracts\Tool — as MESMAS expostas via MCP.
- */
 #[Provider(Lab::Anthropic)]
 #[Model('claude-sonnet-4-6')]
 #[MaxSteps(8)]

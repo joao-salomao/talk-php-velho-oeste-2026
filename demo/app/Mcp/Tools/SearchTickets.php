@@ -10,10 +10,7 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Tool;
 
-/**
- * MCP Tool: busca tickets. Mesma capability que a tool do agente
- * (App\Agents\Tools\SearchTickets), aqui no contrato do Laravel MCP.
- */
+
 class SearchTickets extends Tool
 {
     public function name(): string

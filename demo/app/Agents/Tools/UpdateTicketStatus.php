@@ -10,10 +10,6 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
 
-/**
- * Tool do Laravel AI SDK com efeito colateral. Validar tudo: o LLM não é
- * fonte da verdade — allowlist de status + idempotência do lado PHP.
- */
 class UpdateTicketStatus implements Tool
 {
     public function name(): string

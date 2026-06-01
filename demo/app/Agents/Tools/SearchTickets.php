@@ -10,11 +10,6 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Tools\Request;
 use Stringable;
 
-/**
- * Tool do Laravel AI SDK: busca tickets. Aceita customer_id em vez de
- * nome — força o modelo a resolver via list_customers antes (encadeamento
- * natural de tools).
- */
 class SearchTickets implements Tool
 {
     public function name(): string
